@@ -1,0 +1,68 @@
+Instrucciones para entrenar YOLO
+
+Se recomienda 100% entrenar este modelo en linux
+
+1. Tener el dataset con las fotos y los archivos txt con sus respectivas clases. (Se etiqueta con la aplicacion de labelIMG)
+
+2. OPCIONAL: puede que haya que cambiar el tipo de formato de las coordenadas de los txt
+	1. 2_1_getting-full-path.py (Sección 4, carpeta 28)
+		Se escribe en la terminal lo siguiente:
+		-> python 2_1_getting-full-path.py
+	2. converting-annotations.py (Sección 4, carpeta 28)
+		Habrá que modificar dentro del script las variables 'full_path_to_csv' y 'full_path_to_images'
+		Se escribe en la terminal lo siguiente:
+		-> python 2_2_converting-annotations.py
+
+3. Generar los txt de las fotos de train y de test
+	1. getting-full-path.py (Sección 4, carpeta 28)
+		Se escribe en la terminal lo siguiente:
+		-> python 2_1_getting-full-path.py
+	2. creating-train-and-test-txt-files.py (Sección 4, carpeta 29)
+		Habrá que modificar dentro del script las variables 'full_path_to_images'
+		-> python 3_2_creating-train-and-test-txt-files.py
+	3. creating-files-data-and-name.py (Sección 4, carpeta 29)
+		Habrá que modificar dentro del script las variables 'full_path_to_images'
+		-> python 3_3_creating-files-data-and-name.py
+
+4. OPCIONAL: puede que sea necesario unir dos dataset que incluso tengan clases comunes
+	1. getting-full-path.py (Sección 4, carpeta 30)
+		Se escribe en la terminal lo siguiente:
+		-> python 2_1_getting-full-path.py
+	2. joined-train-and-test-txt-files.py (Sección 4, carpeta 30)
+		Habrá que modificar dentro del script las variables 'full_path_to_images'
+		-> python 4_2_joined-train-and-test-txt-files.py
+	3. joined-files-data-and-name.py (Sección 4, carpeta 30)
+		Habrá que modificar dentro del script las variables 'full_path_to_labelled_images', 'full_path_to_downloaded_images' y 'full_path_to_joined_images'
+		-> python 4_3_joined-files-data-and-name.py
+
+5. Se hace un git clone del github de Alexey/AB darknet
+	1. Se descarga la carpeta donde está el código de YOLO
+		-> git clone https://github.com/AlexeyAB/darknet.git
+		Se creará la carpeta darknet.
+	2. Se accede al archivo "Makefile" (se puede abrir como un bloc de notas). Se modifica las varaibles 'OPENCV=1', 'GPU=1' y 'CUDNN=1'
+	3. En consola se ejecuta la siguiente instrucción dentro del directorio de darknet:
+		-> cd darknet
+		-> make
+
+6. Modificar el archivo de extensión '.cfg' de entrenamiento y de test que se encuentran en el directorio 'cfg'.
+	1. Para el archivo de entrenamiento (train) las opciones de los batch son:
+			batch=			subdivisions=
+			64				8 o 16 o 32
+			32				8 o 16
+			16				8 o 4
+			8				4 o 2
+	2. Para el max_batches = classes*2000 (no menos de 4000)
+	3. El número de steps = 0.8*max_batches, 0.9*max_batches
+	4. filters=(classes+coordinates+1)*mask=(classes+5)*3
+
+7. Se descarga el modelo de pesos para entrenar el código de YOLO y se indica pega en los directorios conveniente los archivos '.data'.
+	1. -> wget https://pjreddie.com/media/files/darknet53.conv.74
+	2. Los archivos creados por el script '3_3_creating-files-data-and-name.py' se guerdan en un archivo '.data' donde se enuentra la información del entrenamiento. (según el punto 8 se puede pegar en el directorio 'cfg')
+
+8. Entrenar el modelo necesitas el archivo darknet53.conv.74 y se crea un backup cada 100 iteraciones
+	1. Linux y MacOS
+./darknet detector train cfg/ts_data.data cfg/yolov3_ts_train.cfg weights/darknet53.conv.74
+	2. Windows
+darknet.exe detector train cfg\ts_data.data cfg\yolov3_ts_train.cfg weights\darknet53.conv.74
+
+# Nota, si se trabaja con maquinas virtuales considere añadir al final -dont_show (parece el código trata de abrir ventanas emergentes y así lo bloquea)
